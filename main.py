@@ -35,5 +35,9 @@ for record in SeqIO.parse("sample.fasta", "fasta"):
 
     print("\nReverse Complement:")
     print(reverse_complement)
+    protein = sequence.translate()
+
+    print("\nProtein Sequence:")
+    print(protein)
 
     print("-" * 50)
