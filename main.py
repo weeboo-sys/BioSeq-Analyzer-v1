@@ -1,43 +1,63 @@
 from Bio import SeqIO
 
+valid_nucleotides = {"A", "T", "G", "C"}
+
 for record in SeqIO.parse("sample.fasta", "fasta"):
 
     sequence = record.seq
 
-    print("-" * 50)
+    is_valid = True
 
-    print("Sequence ID:", record.id)
-    print("Sequence:", sequence)
+    # Validation Step
+    for nucleotide in sequence:
 
-    print("Length:", len(sequence))
+        if nucleotide not in valid_nucleotides:
 
-    # GC Content
-    gc_count = sequence.count("G") + sequence.count("C")
-    gc_content = (gc_count / len(sequence)) * 100
+            is_valid = False
+            break
 
-    print("GC Content:", round(gc_content, 2), "%")
+    # Analysis Step
+    if is_valid:
 
-    # Nucleotide Counts
-    print("\nNucleotide Counts:")
-    print("A:", sequence.count("A"))
-    print("T:", sequence.count("T"))
-    print("G:", sequence.count("G"))
-    print("C:", sequence.count("C"))
+        print("-" * 50)
 
-    # RNA Conversion
-    rna = sequence.transcribe()
+        print("Sequence ID:", record.id)
+        print("Sequence:", sequence)
 
-    print("\nRNA Sequence:")
-    print(rna)
+        print("Length:", len(sequence))
 
-    # Reverse Complement
-    reverse_complement = sequence.reverse_complement()
+        # GC Content
+        gc_count = sequence.count("G") + sequence.count("C")
+        gc_content = (gc_count / len(sequence)) * 100
 
-    print("\nReverse Complement:")
-    print(reverse_complement)
-    protein = sequence.translate()
+        print("GC Content:", round(gc_content, 2), "%")
+
+        # Nucleotide Counts
+        print("\nNucleotide Counts:")
+        print("A:", sequence.count("A"))
+        print("T:", sequence.count("T"))
+        print("G:", sequence.count("G"))
+        print("C:", sequence.count("C"))
+
+        # RNA Conversion
+        rna = sequence.transcribe()
+
+        print("\nRNA Sequence:")
+        print(rna)
+
+        # Reverse Complement
+        reverse_complement = sequence.reverse_complement()
+
+        print("\nReverse Complement:")
+        print(reverse_complement)
+
+        # Protein Translation
+        protein = sequence.translate()
      # Protein Sequence
-    print("\nProtein Sequence:")
-    print(protein)
+        print("\nProtein Sequence:")
+        print(protein)
 
-    print("-" * 50)
+    else:
+
+        print("-" * 50)
+        print("Invalid DNA sequence detected!")
