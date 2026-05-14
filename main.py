@@ -1,23 +1,35 @@
 from Bio import SeqIO
 
-valid_nucleotides = {"A", "T", "G", "C"}
 
-for record in SeqIO.parse("sample.fasta", "fasta"):
+# GC Content Function
+def calculate_gc_content(sequence):
 
-    sequence = record.seq
+    gc_count = sequence.count("G") + sequence.count("C")
 
-    is_valid = True
+    return (gc_count / len(sequence)) * 100
 
-    # Validation Step
+
+# Validation Function
+def validate_sequence(sequence):
+
+    valid_nucleotides = {"A", "T", "G", "C"}
+
     for nucleotide in sequence:
 
         if nucleotide not in valid_nucleotides:
 
-            is_valid = False
-            break
+            return False
+
+    return True
+
+
+# Main Program
+for record in SeqIO.parse("sample.fasta", "fasta"):
+
+    sequence = record.seq
 
     # Analysis Step
-    if is_valid:
+    if validate_sequence(sequence):
 
         print("-" * 50)
 
@@ -27,8 +39,7 @@ for record in SeqIO.parse("sample.fasta", "fasta"):
         print("Length:", len(sequence))
 
         # GC Content
-        gc_count = sequence.count("G") + sequence.count("C")
-        gc_content = (gc_count / len(sequence)) * 100
+        gc_content = calculate_gc_content(sequence)
 
         print("GC Content:", round(gc_content, 2), "%")
 
@@ -53,7 +64,7 @@ for record in SeqIO.parse("sample.fasta", "fasta"):
 
         # Protein Translation
         protein = sequence.translate()
-     # Protein Sequence
+
         print("\nProtein Sequence:")
         print(protein)
 
