@@ -1,3 +1,4 @@
+import csv
 from Bio import SeqIO
 
 
@@ -23,52 +24,84 @@ def validate_sequence(sequence):
     return True
 
 
-# Main Program
-for record in SeqIO.parse("sample.fasta", "fasta"):
+# Open CSV File
+with open("results.csv", "w", newline="") as file:
 
-    sequence = record.seq
+    writer = csv.writer(file)
 
-    # Analysis Step
-    if validate_sequence(sequence):
+    # CSV Header
+    writer.writerow([
+        "Sequence ID",
+        "Length",
+        "GC Content (%)",
+        "A Count",
+        "T Count",
+        "G Count",
+        "C Count"
+    ])
 
-        print("-" * 50)
+    # Main Program
+    for record in SeqIO.parse("sample.fasta", "fasta"):
 
-        print("Sequence ID:", record.id)
-        print("Sequence:", sequence)
+        sequence = record.seq
 
-        print("Length:", len(sequence))
+        # Validation Check
+        if validate_sequence(sequence):
 
-        # GC Content
-        gc_content = calculate_gc_content(sequence)
+            print("-" * 50)
 
-        print("GC Content:", round(gc_content, 2), "%")
+            print("Sequence ID:", record.id)
+            print("Sequence:", sequence)
 
-        # Nucleotide Counts
-        print("\nNucleotide Counts:")
-        print("A:", sequence.count("A"))
-        print("T:", sequence.count("T"))
-        print("G:", sequence.count("G"))
-        print("C:", sequence.count("C"))
+            print("Length:", len(sequence))
 
-        # RNA Conversion
-        rna = sequence.transcribe()
+            # GC Content
+            gc_content = calculate_gc_content(sequence)
 
-        print("\nRNA Sequence:")
-        print(rna)
+            print("GC Content:", round(gc_content, 2), "%")
 
-        # Reverse Complement
-        reverse_complement = sequence.reverse_complement()
+            # Nucleotide Counts
+            a_count = sequence.count("A")
+            t_count = sequence.count("T")
+            g_count = sequence.count("G")
+            c_count = sequence.count("C")
 
-        print("\nReverse Complement:")
-        print(reverse_complement)
+            print("\nNucleotide Counts:")
+            print("A:", a_count)
+            print("T:", t_count)
+            print("G:", g_count)
+            print("C:", c_count)
 
-        # Protein Translation
-        protein = sequence.translate()
+            # RNA Conversion
+            rna = sequence.transcribe()
 
-        print("\nProtein Sequence:")
-        print(protein)
+            print("\nRNA Sequence:")
+            print(rna)
 
-    else:
+            # Reverse Complement
+            reverse_complement = sequence.reverse_complement()
 
-        print("-" * 50)
-        print("Invalid DNA sequence detected!")
+            print("\nReverse Complement:")
+            print(reverse_complement)
+
+            # Protein Translation
+            protein = sequence.translate()
+
+            print("\nProtein Sequence:")
+            print(protein)
+
+            # Write To CSV
+            writer.writerow([
+                record.id,
+                len(sequence),
+                round(gc_content, 2),
+                a_count,
+                t_count,
+                g_count,
+                c_count
+            ])
+
+        else:
+
+            print("-" * 50)
+            print("Invalid DNA sequence detected!")
