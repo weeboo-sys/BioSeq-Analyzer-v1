@@ -2,6 +2,10 @@ import csv
 from Bio import SeqIO
 
 
+# ==========================
+# FUNCTIONS
+# ==========================
+
 # GC Content Function
 def calculate_gc_content(sequence):
 
@@ -24,7 +28,32 @@ def validate_sequence(sequence):
     return True
 
 
-# Open CSV File
+# Mutation Detection Function
+def detect_mutations(seq1, seq2):
+
+    mutations = []
+
+    if len(seq1) != len(seq2):
+
+        return ["Sequences have different lengths"]
+
+    for i in range(len(seq1)):
+
+        if seq1[i] != seq2[i]:
+
+            mutations.append(
+                f"Position {i+1}: {seq1[i]} -> {seq2[i]}"
+            )
+
+    return mutations
+
+
+# ==========================
+# MAIN PROGRAM
+# ==========================
+
+sequences = []
+
 with open("results.csv", "w", newline="") as file:
 
     writer = csv.writer(file)
@@ -37,15 +66,20 @@ with open("results.csv", "w", newline="") as file:
         "A Count",
         "T Count",
         "G Count",
-        "C Count"
+        "C Count",
+        "RNA Sequence",
+        "Protein Sequence"
     ])
 
-    # Main Program
+    # Read FASTA File
     for record in SeqIO.parse("sample.fasta", "fasta"):
 
         sequence = record.seq
 
-        # Validation Check
+        # Store sequence for mutation analysis
+        sequences.append((record.id, str(sequence)))
+
+        # Validation
         if validate_sequence(sequence):
 
             print("-" * 50)
@@ -72,7 +106,7 @@ with open("results.csv", "w", newline="") as file:
             print("G:", g_count)
             print("C:", c_count)
 
-            # RNA Conversion
+            # RNA
             rna = sequence.transcribe()
 
             print("\nRNA Sequence:")
@@ -90,7 +124,7 @@ with open("results.csv", "w", newline="") as file:
             print("\nProtein Sequence:")
             print(protein)
 
-            # Write To CSV
+            # Write Results to CSV
             writer.writerow([
                 record.id,
                 len(sequence),
@@ -98,10 +132,44 @@ with open("results.csv", "w", newline="") as file:
                 a_count,
                 t_count,
                 g_count,
-                c_count
+                c_count,
+                str(rna),
+                str(protein)
             ])
 
         else:
 
             print("-" * 50)
             print("Invalid DNA sequence detected!")
+            print("Sequence ID:", record.id)
+
+
+# ==========================
+# MUTATION ANALYSIS
+# ==========================
+
+print("\nMutation Analysis")
+print("-" * 50)
+
+if len(sequences) >= 2:
+
+    seq1_id, seq1 = sequences[0]
+    seq2_id, seq2 = sequences[1]
+
+    mutations = detect_mutations(seq1, seq2)
+
+    print(f"Comparing {seq1_id} vs {seq2_id}")
+
+    if len(mutations) > 0:
+
+        for mutation in mutations:
+
+            print(mutation)
+
+    else:
+
+        print("No mutations detected")
+
+else:
+
+    print("Need at least two sequences for mutation analysis")
