@@ -1,51 +1,80 @@
+import sys
 import csv
 from Bio import SeqIO
+
+# Fix Windows emoji/encoding issue
+sys.stdout.reconfigure(encoding='utf-8')
+
+
+# ==========================
+# GLOBAL MUTATION STATS
+# ==========================
+
+mutation_stats = {
+    "transition": 0,
+    "transversion": 0,
+    "total": 0
+}
 
 
 # ==========================
 # FUNCTIONS
 # ==========================
 
-# GC Content Function
-def calculate_gc_content(sequence):
+def classify_mutation(base1, base2):
+    purines = {"A", "G"}
+    pyrimidines = {"C", "T"}
 
-    gc_count = sequence.count("G") + sequence.count("C")
+    if base1 == base2:
+        return "none"
 
-    return (gc_count / len(sequence)) * 100
-
-
-# Validation Function
-def validate_sequence(sequence):
-
-    valid_nucleotides = {"A", "T", "G", "C"}
-
-    for nucleotide in sequence:
-
-        if nucleotide not in valid_nucleotides:
-
-            return False
-
-    return True
+    if (base1 in purines and base2 in purines) or (base1 in pyrimidines and base2 in pyrimidines):
+        return "transition"
+    else:
+        return "transversion"
 
 
-# Mutation Detection Function
 def detect_mutations(seq1, seq2):
-
     mutations = []
 
     if len(seq1) != len(seq2):
-
         return ["Sequences have different lengths"]
 
     for i in range(len(seq1)):
-
         if seq1[i] != seq2[i]:
 
+            mutation_type = classify_mutation(seq1[i], seq2[i])
+
+            if mutation_type == "transition":
+                mutation_stats["transition"] += 1
+            elif mutation_type == "transversion":
+                mutation_stats["transversion"] += 1
+
+            mutation_stats["total"] += 1
+
             mutations.append(
-                f"Position {i+1}: {seq1[i]} -> {seq2[i]}"
+                f"Position {i+1}: {seq1[i]} -> {seq2[i]} ({mutation_type})"
             )
 
     return mutations
+
+
+def calculate_gc_content(sequence):
+    if len(sequence) == 0:
+        return 0
+    return (sequence.count("G") + sequence.count("C")) / len(sequence) * 100
+
+
+def validate_sequence(sequence):
+    valid = {"A", "T", "G", "C"}
+    return all(base in valid for base in sequence)
+
+
+def count_amino_acids(protein):
+    counts = {}
+    for aa in protein:
+        counts[aa] = counts.get(aa, 0) + 1
+    return counts
 
 
 # ==========================
@@ -55,10 +84,8 @@ def detect_mutations(seq1, seq2):
 sequences = []
 
 with open("results.csv", "w", newline="") as file:
-
     writer = csv.writer(file)
 
-    # CSV Header
     writer.writerow([
         "Sequence ID",
         "Length",
@@ -71,105 +98,106 @@ with open("results.csv", "w", newline="") as file:
         "Protein Sequence"
     ])
 
-    # Read FASTA File
     for record in SeqIO.parse("sample.fasta", "fasta"):
 
-        sequence = record.seq
+        sequence = str(record.seq).upper()
+        sequences.append((record.id, sequence))
 
-        # Store sequence for mutation analysis
-        sequences.append((record.id, str(sequence)))
+        print("\n" + "-" * 60)
 
-        # Validation
-        if validate_sequence(sequence):
-
-            print("-" * 50)
-
+        if not validate_sequence(sequence):
+            print("❌ Invalid DNA sequence detected!")
             print("Sequence ID:", record.id)
-            print("Sequence:", sequence)
+            continue
 
-            print("Length:", len(sequence))
+        print("🧬 Sequence ID:", record.id)
+        print("Sequence:", sequence)
 
-            # GC Content
-            gc_content = calculate_gc_content(sequence)
+        print("Length:", len(sequence))
 
-            print("GC Content:", round(gc_content, 2), "%")
+        gc_content = calculate_gc_content(sequence)
+        print("GC Content:", round(gc_content, 2), "%")
 
-            # Nucleotide Counts
-            a_count = sequence.count("A")
-            t_count = sequence.count("T")
-            g_count = sequence.count("G")
-            c_count = sequence.count("C")
+        a_count = sequence.count("A")
+        t_count = sequence.count("T")
+        g_count = sequence.count("G")
+        c_count = sequence.count("C")
 
-            print("\nNucleotide Counts:")
-            print("A:", a_count)
-            print("T:", t_count)
-            print("G:", g_count)
-            print("C:", c_count)
+        print("\nNucleotide Counts:")
+        print("A:", a_count)
+        print("T:", t_count)
+        print("G:", g_count)
+        print("C:", c_count)
 
-            # RNA
-            rna = sequence.transcribe()
+        rna = record.seq.transcribe()
+        protein = record.seq.translate()
+        reverse_complement = record.seq.reverse_complement()
 
-            print("\nRNA Sequence:")
-            print(rna)
+        print("\nRNA Sequence:", rna)
+        print("Reverse Complement:", reverse_complement)
+        print("Protein Sequence:", protein)
 
-            # Reverse Complement
-            reverse_complement = sequence.reverse_complement()
+        amino_acid_counts = count_amino_acids(str(protein))
+        print("\nAmino Acid Counts:")
+        for aa, count in amino_acid_counts.items():
+            print(f"{aa}: {count}")
 
-            print("\nReverse Complement:")
-            print(reverse_complement)
-
-            # Protein Translation
-            protein = sequence.translate()
-
-            print("\nProtein Sequence:")
-            print(protein)
-
-            # Write Results to CSV
-            writer.writerow([
-                record.id,
-                len(sequence),
-                round(gc_content, 2),
-                a_count,
-                t_count,
-                g_count,
-                c_count,
-                str(rna),
-                str(protein)
-            ])
-
-        else:
-
-            print("-" * 50)
-            print("Invalid DNA sequence detected!")
-            print("Sequence ID:", record.id)
+        writer.writerow([
+            record.id,
+            len(sequence),
+            round(gc_content, 2),
+            a_count,
+            t_count,
+            g_count,
+            c_count,
+            str(rna),
+            str(protein)
+        ])
 
 
 # ==========================
 # MUTATION ANALYSIS
 # ==========================
 
-print("\nMutation Analysis")
-print("-" * 50)
+print("\n" + "=" * 60)
+print("🧬 MUTATION ANALYSIS")
+print("=" * 60)
 
 if len(sequences) >= 2:
 
     seq1_id, seq1 = sequences[0]
     seq2_id, seq2 = sequences[1]
 
+    print(f"Comparing {seq1_id} vs {seq2_id}\n")
+
     mutations = detect_mutations(seq1, seq2)
 
-    print(f"Comparing {seq1_id} vs {seq2_id}")
-
-    if len(mutations) > 0:
-
-        for mutation in mutations:
-
-            print(mutation)
-
+    if mutations:
+        for m in mutations:
+            print(m)
     else:
-
         print("No mutations detected")
 
 else:
-
     print("Need at least two sequences for mutation analysis")
+
+
+# ==========================
+# MUTATION DASHBOARD
+# ==========================
+
+print("\n" + "=" * 60)
+print("📊 MUTATION DASHBOARD")
+print("=" * 60)
+
+total = mutation_stats["total"]
+transition = mutation_stats["transition"]
+transversion = mutation_stats["transversion"]
+
+print("Total Mutations:", total)
+print("Transitions 🟢:", transition)
+print("Transversions 🔴:", transversion)
+
+if total > 0:
+    print("Transition %:", round((transition / total) * 100, 2), "%")
+    print("Transversion %:", round((transversion / total) * 100, 2), "%")
