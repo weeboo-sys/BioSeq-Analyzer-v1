@@ -1,28 +1,46 @@
 # BioSeq Analyzer
 
-A small bioinformatics project I built while learning Python and Biopython.
+BioSeq Analyzer is a bioinformatics project built in Python using Biopython. The project started as a way to learn how biological sequence data can be analyzed computationally and has gradually expanded with additional sequence analysis features.
 
-The idea was simple: take DNA sequences from a FASTA file and perform some basic biological analysis on them.
+## Features
 
-## Current Features
+* FASTA file parsing
+* DNA sequence validation
+* Sequence length calculation
+* GC content analysis
+* Nucleotide counting (A, T, G, C)
+* DNA to RNA transcription
+* Protein translation
+* Amino acid composition analysis
+* Mutation detection between sequences
+* Transition and transversion classification
+* Sequence similarity calculation
+* CSV export of analysis results
+* Mutation statistics dashboard
+* Mutation distribution visualization
+* Mutation position visualization
 
-- Read FASTA files
-- Validate DNA sequences
-- Calculate sequence length
-- Calculate GC content
-- Count A, T, G and C nucleotides
-- Convert DNA to RNA
-- Generate reverse complements
-- Translate DNA into protein sequences
-- Export results to CSV
-- Detect mutations between sequences
+## Technologies Used
 
-## Tech Used
+* Python
+* Biopython
+* Matplotlib
+* CSV
+* Git
+* GitHub
 
-- Python
-- Biopython
-- Git
-- GitHub
+## Project Structure
+
+```text
+BioSeq-Analyzer/
+│
+├── main.py
+├── sample.fasta
+├── results.csv
+├── mutation_distribution.png
+├── mutation_positions.png
+└── README.md
+```
 
 ## Example Input
 
@@ -34,31 +52,60 @@ ATGCGTAGCTAG
 ATGAGTAGCTAG
 ```
 
-## Example Mutation Output
+## Example Output
 
 ```text
-Comparing Sequence_1 vs Sequence_2
+Mutation Analysis
+============================================================
 
-Position 4: C -> A
+Sequence_1 vs Sequence_2
+
+Position 4: C -> A (transversion)
+
+Total Mutations: 1
+Transitions: 0
+Transversions: 1
+
+Similarity: 91.67%
 ```
 
-## Why I Built This
+## CSV Output
 
-I'm currently learning bioinformatics and computational biology and wanted to build projects instead of only watching tutorials.
+The program generates a CSV file containing:
 
-This project helped me get comfortable with:
-- Python
-- Working with biological sequence data
-- Using Biopython
-- Reading FASTA files
-- Basic Git and GitHub workflow
+* Sequence ID
+* Length
+* GC Content (%)
+* Nucleotide Counts
+* RNA Sequence
+* Protein Sequence
 
-## Next Things I Want To Add
+## What I Learned
 
-- Better mutation analysis
-- Amino acid statistics
-- Multi-sequence comparisons
-- Protein analysis features
-- Integration with biological databases
+This project helped me understand:
 
-Still very much a learning project, but it's been fun building it.
+* Working with biological sequence data
+* FASTA file handling
+* Python functions and modular code
+* Dictionaries and data structures
+* Data export using CSV
+* Mutation analysis concepts
+* Data visualization with Matplotlib
+* Git and GitHub workflow
+
+## Future Improvements
+
+* Pairwise comparison of all sequences in a FASTA file
+* Similarity matrix generation
+* Amino acid frequency charts
+* Protein molecular weight calculation
+* Integration with biological databases
+* BLAST integration
+* Pandas-based analysis workflow
+* AI-assisted biological data analysis
+
+## Author
+
+Sahil Al Farish
+
+Built as part of my journey into bioinformatics, computational biology, and AI for biological research.
